@@ -1,0 +1,79 @@
+# User-data check — 2026-11-14
+
+URL: https://tradoooo.github.io/packet-voyage/
+Oracle: voyage read --offline (the same pipeline, run in Node)
+Browser: headless Chromium, no credentials, no local build.
+
+## Step 1 — the visitor pastes the trace
+How: the text is pasted in the site and computed there
+
+- ok   summary-distance: "TOTAL DISTANCE: at least 6,254 km" — expected 6254
+- ok   summary-rtt: "MEASURED ROUND-TRIP DELAY: 91.7 ms" — expected 91.702
+- ok   summary-light-floor: "FIBRE LIGHT FLOOR: 60.8 ms" — expected 60.76044045356286
+- ok   summary-inflation: "ROUTE INFLATION: ×1.51" — expected 1.509238565676375
+- ok   summary-countries: "COUNTRIES WHERE A HOP WAS LOCATED: 3 (FR, GB, US)" — expected 3
+- ok   summary-networks: "DISTINCT NETWORKS: 0" — expected 0
+- ok   summary-ixps: "INTERNET EXCHANGE POINTS: 0" — expected 0
+- ok   summary-rejections: "LOCATIONS REJECTED BY LIGHT: 0" — expected 0
+- ok   summary-gaps: "UNLOCATED OR SILENT HOPS: 1" — expected 1
+
+**Step verdict: PASS**
+
+## Step 2 — the visitor opens the journey.json the command line wrote
+How: `voyage read --offline --json` wrote it; the site reads it with the File API
+
+- ok   summary-distance: "TOTAL DISTANCE: at least 6,254 km" — expected 6254
+- ok   summary-rtt: "MEASURED ROUND-TRIP DELAY: 91.7 ms" — expected 91.702
+- ok   summary-light-floor: "FIBRE LIGHT FLOOR: 60.8 ms" — expected 60.76044045356286
+- ok   summary-inflation: "ROUTE INFLATION: ×1.51" — expected 1.509238565676375
+- ok   summary-countries: "COUNTRIES WHERE A HOP WAS LOCATED: 3 (FR, GB, US)" — expected 3
+- ok   summary-networks: "DISTINCT NETWORKS: 0" — expected 0
+- ok   summary-ixps: "INTERNET EXCHANGE POINTS: 0" — expected 0
+- ok   summary-rejections: "LOCATIONS REJECTED BY LIGHT: 0" — expected 0
+- ok   summary-gaps: "UNLOCATED OR SILENT HOPS: 1" — expected 1
+
+**Step verdict: PASS**
+
+## Step 3 — the visitor opens a share link
+How: the journey rides in the fragment; no server stores it
+
+- ok   summary-distance: "TOTAL DISTANCE: at least 6,254 km" — expected 6254
+- ok   summary-rtt: "MEASURED ROUND-TRIP DELAY: 91.7 ms" — expected 91.702
+- ok   summary-light-floor: "FIBRE LIGHT FLOOR: 60.8 ms" — expected 60.76044045356286
+- ok   summary-inflation: "ROUTE INFLATION: ×1.51" — expected 1.509238565676375
+- ok   summary-countries: "COUNTRIES WHERE A HOP WAS LOCATED: 3 (FR, GB, US)" — expected 3
+- ok   summary-networks: "DISTINCT NETWORKS: 0" — expected 0
+- ok   summary-ixps: "INTERNET EXCHANGE POINTS: 0" — expected 0
+- ok   summary-rejections: "LOCATIONS REJECTED BY LIGHT: 0" — expected 0
+- ok   summary-gaps: "UNLOCATED OR SILENT HOPS: 1" — expected 1
+
+**Step verdict: PASS**
+
+## Step 4 — the catalogue demonstrates that journey
+How: every block of #/features runs on the loaded journey
+
+- ok   feature blocks rendered: "14" — expected 13
+- ok   data named on screen: "Your data — www.example.org, traced on 14 Nov 2026." — expected Your data
+
+**Step verdict: PASS**
+
+## Step 5 — the chain of proof: the blocks tell the same story
+How: every figure more than one block shows, read from the page and compared block by block
+
+- ok   chain proof.distance: "map=6253.58522572968 export=6253.58522572968" — expected one value
+- ok   chain proof.floor: "map=60.76044045356286 insights=60.76044045356286" — expected one value
+- ok   chain proof.hops: "timeline=8 roadmap=8 export=8" — expected one value
+- ok   chain proof.countries: "insights=3 story=3" — expected one value
+- ok   chain proof.segments: "roadmap=6 export=6" — expected one value
+- ok   chain proof.distance against the oracle: "6253.58522572968" — expected 6254
+- ok   chain verdict: "5 figures shared by two blocks or more, and the blocks agree." — expected the blocks agree
+
+**Step verdict: PASS**
+
+## Network
+- requests: 12
+- outside https://tradoooo.github.io: 0
+- errors: 0
+
+VERDICT: every door of the site gives the visitor’s own data exactly like the command line, and calls nobody.
+
