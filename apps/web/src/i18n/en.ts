@@ -306,7 +306,7 @@ export const EN_KEYS = {
   'features.paste.text': 'The reader cleans what it must (a byte-order mark, tabs) and says so, then computes the journey locally from the router names.',
   'features.cli.title': 'Trace your own route from a terminal',
   'features.cli.text': 'The hosted site never probes the Internet — that is the rule, not a limitation. To trace your own route, one host at a time, use the command line:',
-  'features.cli.note': 'The npm package packet-voyage is not published yet, so npx packet-voyage does not work (it answers 404). Run it from the sources: git clone https://github.com/Tradoooo/packet-voyage, then pnpm install && pnpm build — after that, the commands below work as they are.',
+  'features.cli.note': 'The npm package packet-voyage is not published yet — npm view packet-voyage answers 404 — so npx packet-voyage does not work. Run it from the sources: git clone https://github.com/Tradoooo/packet-voyage, then pnpm install && pnpm build — after that, the commands below work as they are. The last one shows the optional local geolocation database (DB-IP Lite, CC BY 4.0): it stays on your machine, is downloaded only with your consent, and every journey it locates carries its credit.',
   'features.open': 'Open this view',
   'features.copy': 'Copy',
   'features.copied': 'Copied',

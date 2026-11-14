@@ -308,7 +308,7 @@ export const FR_KEYS: Record<I18nKey, string> = {
   'features.paste.text': 'Le lecteur nettoie ce qu’il doit (un BOM, des tabulations) et le dit, puis calcule le trajet localement à partir des noms de routeurs.',
   'features.cli.title': 'Tracez votre propre route depuis un terminal',
   'features.cli.text': 'Le site hébergé ne sonde jamais Internet — c’est la règle, pas une limite. Pour tracer votre propre route, un hôte à la fois, passez par la ligne de commande :',
-  'features.cli.note': 'Le paquet npm packet-voyage n’est pas encore publié : npx packet-voyage ne fonctionne pas (il répond 404). Lancez-le depuis les sources : git clone https://github.com/Tradoooo/packet-voyage, puis pnpm install && pnpm build — ensuite, les commandes ci-dessous fonctionnent telles quelles.',
+  'features.cli.note': 'Le paquet npm packet-voyage n’est pas encore publié — npm view packet-voyage répond 404 — donc npx packet-voyage ne fonctionne pas. Lancez-le depuis les sources : git clone https://github.com/Tradoooo/packet-voyage, puis pnpm install && pnpm build — ensuite, les commandes ci-dessous fonctionnent telles quelles. La dernière montre la base de géolocalisation locale facultative (DB-IP Lite, CC BY 4.0) : elle reste sur votre machine, ne se télécharge qu’avec votre accord, et chaque trajet qu’elle situe porte son crédit.',
   'features.open': 'Ouvrir cette vue',
   'features.copy': 'Copier',
   'features.copied': 'Copié',
