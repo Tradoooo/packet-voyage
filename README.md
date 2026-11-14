@@ -40,10 +40,13 @@ node apps/cli/bin/voyage.mjs export journey.json --format geojson   # for QGIS, 
 node apps/cli/bin/voyage.mjs export redacted.json --format markdown # a ticket-ready report
 node apps/cli/bin/voyage.mjs compare v4.json v6.json  # two journeys, facts only
 node apps/cli/bin/voyage.mjs share journey.json       # redact, then share a link
+node apps/cli/bin/voyage.mjs data geodb status         # local geolocation database
+node apps/cli/bin/voyage.mjs data geodb update         # download DB-IP Lite (consent required)
+# or: data geodb import <archive.csv.gz> — use a local copy, no network request
 ```
 
-> The npm package `packet-voyage` is not published yet, so `npx packet-voyage`
-> does not work at the time of writing: build from the clone as above.
+> **The npm package `packet-voyage` is not published yet** (`npm view packet-voyage`
+> returns 404), so `npx packet-voyage` does not work. Build from the clone as above.
 
 ## Three decisions that shape everything
 
