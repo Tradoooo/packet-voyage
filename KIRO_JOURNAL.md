@@ -278,6 +278,76 @@ here:
 - **Duration / credits**: `TODO(measure)` — this build does not run under the Kiro
   IDE, so the hook cannot know the duration (§14.6: no invented credits).
 
+## 2026-11-14 (suite) — the geolocation database gets a data path, and the indicator splits
+
+- **Surface**: CLI and enrichment (`packages/enrich`, `apps/cli`), one
+  measurement script, the docs and the contract. No probe run today: the eight
+  traces of 2026-11-13 were read offline, and the archive came from a single
+  download of a public dataset.
+- **What the owner decided**: of the two decisions the morning entry left open,
+  both — « 1 et 2 et 3 »: feed `geodb` **and** amend the indicator, plus the npm
+  page. Nothing was chosen for the owner; both were done, and the numbers are
+  reported as they came out.
+- **What was measured before writing any code** (`~/Bureau/pv-traces/`, DB-IP
+  City Lite 2026-11, 7 777 727 ranges): **21 of the 27** public hops without a
+  location do exist in the database, with a city and coordinates. Six do not
+  (`141.101.67.173`, `37.77.36.8`, `37.77.32.11`, `84.116.132.177`,
+  `141.101.67.159`, `104.18.21.81`). That is why the path was worth building,
+  and why it was not guessed at.
+- **The archive is not what the docs said.** 85.7 MB compressed, not the ~20 MB
+  the vendor's page suggests; converted, it lands at **89.2 MB in 299 gzip
+  shards** under `~/.packet-voyage/geodb/dbip-city-lite/`. The tool therefore
+  states the size before fetching, refuses anything above a cap
+  (`--max-mb`, default 256 MB), and offers `data geodb import <archive>` for a
+  copy the user already has — the same conversion, **zero request**.
+- **A consent that does not name the download does not cover it.** The record
+  granted on 2026-11-13 lists `dns, ripestat, ipmap, peeringdb`; `update`
+  refuses until the owner re-grants with DB-IP Lite named. That is a refusal,
+  not a workaround: the download path is implemented, tested and ready, and it
+  has not been run on this machine.
+- **Measured through the product, offline, on the same eight traces**
+  (`node scripts/enrich-localdb.mjs ~/Bureau/pv-traces/*.enriched.json --out
+  /tmp/pv-geodb` then `node scripts/calibrate.mjs /tmp/pv-geodb/*.json`):
+
+  | | sans la base | avec la base |
+  |---|---|---|
+  | hops publics localisés, tout niveau | 15/43 — 34,9 % | **37/43 — 86,0 %** |
+  | localisés `solide` ou `probable` | 11/43 — 25,6 % | 11/43 — 25,6 % |
+  | trous | 28 | **6** |
+  | rejets par la lumière | 3 | **8** |
+
+  The two lines that did not move are the point: `geodb` weighs 0.3, under the
+  0.50 `probable` band, so it situates a hop without confirming it. Five of the
+  twenty-two answers it gives are rejected by the light and counted as such.
+- **The contract changed, the measurement did not.** §18 now carries three
+  rows: the gallery (≥ 70 %, measured 76,7 %), real traces at
+  `solide`/`probable` (descriptive, 25,6 %, with the reason next to it), and
+  real traces at any level (≥ 70 %, measured 86,0 %). A single ratio could not
+  tell « situé » from « confirmé ».
+- **Two repairs the path needed**, each one found by running it rather than by
+  reading it: `createJsonNetworkDb` scanned linearly and could not express a
+  range (`start`/`end`), so it now searches `(lo, hi)` bounds and answers the
+  narrowest row; and `DatasetError` / `CliError` used constructor parameter
+  properties, which plain Node cannot load — the measurement script needs that.
+- **The npm package, still not published.** `npm view packet-voyage` answers
+  **404**; `npm whoami` answers **401** with the token in `~/.npmrc`. The
+  staging works (`node scripts/publish-package.mjs` → five files, 219.5 kB,
+  no `workspace:` link) and `npm publish --dry-run` passes, so the only missing
+  step is an authenticated owner. The local branch `feat/npm-published`
+  (`dd8c1ac`) claims the package is on npm and inverts the test that forbids
+  `npx`: it stays unmerged, because that is the defect PR #34 closed. The page
+  now quotes the registry instead of repeating a claim, and names the database
+  commands that do exist.
+- **Checked after the change**: 692 tests over 97 files green, typecheck 0,
+  lint 0, 8/8 guards, the deployed site re-checked against the command line
+  (`docs/evidence/user-data-2026-11-14.log`: 36 checks, 0 failure, 0 request
+  outside the origin), and the page verified in a real browser: the note quotes
+  the 404 and the catalogue shows `pnpm voyage data geodb status`.
+- **Duration / credits**: `TODO(measure)` — this build does not run under the
+  Kiro IDE, so the hook cannot know the duration (§14.6: no invented credits).
+
+---
+
 ---
 
 ## The three facts to prove (§14.6) — placeholders until measured
