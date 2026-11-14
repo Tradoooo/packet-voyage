@@ -18,7 +18,7 @@
  * inputs are recorded files and the enrichment runs offline, so a fetch call
  * would be an error, not a fallback.
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import process from 'node:process';
 import { parseJourney } from '../packages/schema/src/index.ts';
