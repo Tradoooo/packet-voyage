@@ -65,7 +65,7 @@ Export options:  --format geojson|markdown (default geojson)  --language en|fr
                  --out <file>  --json
 Compare options: --language en|fr  --json
 Data options:   --offline (refuses update)  --json
-                geodb: --force (refresh a fresh copy)  --max-mb <n> (refuse a bigger archive)
+                geodb: --refresh (refresh a fresh copy)  --max-mb <n> (refuse a bigger archive)
 Consent:        --json
 
 Environment:
@@ -80,7 +80,7 @@ interface ParsedArgs {
 }
 
 const VALUE_FLAGS = new Set(['proto', 'cycles', 'from', 'out', 'level', 'base-url', 'year', 'format', 'language', 'max-mb']);
-const BOOLEAN_FLAGS = new Set(['help', 'ipv6', 'offline', 'open', 'json', 'yes', 'force']);
+const BOOLEAN_FLAGS = new Set(['help', 'ipv6', 'offline', 'open', 'json', 'yes', 'refresh']);
 
 function takeOption(argv: string[], idx: number, flags: Record<string, string | boolean>): number {
   const token = argv[idx] ?? '';
@@ -206,7 +206,7 @@ async function dispatchAdmin(command: string, op: string | undefined, rest: stri
         rest,
         offline: bool(flags, 'offline'),
         json,
-        force: bool(flags, 'force'),
+        force: bool(flags, 'refresh'),
         ...(maxMbRaw === undefined ? {} : { maxMb: Number(maxMbRaw) }),
         ...(opts.fetcher ? { fetcher: opts.fetcher } : {}),
       },
