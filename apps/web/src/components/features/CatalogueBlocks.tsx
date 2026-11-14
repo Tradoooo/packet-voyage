@@ -12,6 +12,7 @@ import { Section } from './Section.tsx';
 const CLI_COMMANDS = [
   { label: 'Trace one host', command: 'pnpm voyage trace example.org' },
   { label: 'Read a trace you already have', command: 'pnpm voyage read trace.txt' },
+  { label: 'Check the local geolocation database', command: 'pnpm voyage data geodb status' },
   { label: 'Explain the journey', command: 'pnpm voyage explain journey.json --year 1987' },
   { label: 'Export for a ticket or a GIS', command: 'pnpm voyage export journey.json --format geojson' },
   { label: 'Serve the four tools to an agent', command: 'pnpm voyage mcp' },

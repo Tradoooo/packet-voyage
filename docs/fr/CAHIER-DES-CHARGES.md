@@ -124,7 +124,7 @@ Pourquoi le problème persiste :
 |---|---|
 | Localisations physiquement impossibles affichées | Zéro, garanti par les propriétés VOY-P-06 et VOY-P-07 |
 | Étapes publiques localisées au niveau « solide » ou « probable » sur la galerie | Au moins 70 % — mesuré **76,7 %** (33 sur 43) |
-| Étapes publiques localisées au niveau « solide » ou « probable » sur des traces réelles | Au moins 70 % — mesuré **25,6 %** (11 sur 43, huit traces du 2026-11-13). La base locale de géolocalisation pèse 0,3, sous le seuil « probable » (0,50) : elle situe un hop sans le confirmer. Cible distincte de celle de la galerie, car les traces réelles n'ont ni noms de route ni PTR |
+| Étapes publiques localisées au niveau « solide » ou « probable » sur des traces réelles | Indicateur descriptif (aucune cible d'acceptation ; la base `geodb` ne fait que 0,3) | **25,6 %** (11 sur 43). Donné à côté du taux tous niveaux pour distinguer « situé » de « confirmé » |
 | Étapes publiques localisées, à quelque niveau de confiance que ce soit, sur des traces réelles | Au moins 70 % — mesuré **86,0 %** (37 sur 43). C'est le ratio que la base locale déplace : 34,9 % (15 sur 43) sans elle |
 | Temps entre la fin de la trace et l'affichage du trajet, cache chaud | Moins de 3 secondes |
 | Libellés affirmant un câble « emprunté » | Zéro, vérifié par un contrôle automatique du vocabulaire |
