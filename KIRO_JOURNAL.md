@@ -163,7 +163,7 @@ here:
   the synthetic example (`www.example.org`, RFC 5737 addresses). On
   2026-11-13 the owner asked for the agent to produce them: *"fait toi, je
   veux que tu fasses tout sauf vidéo et submission"*. The allowlist is
-  therefore extended — **seven named hosts, in writing**, in
+  therefore extended — **eleven named hosts, in writing**, in
   `.kiro/probe-allowlist.txt` — and `voyage consent grant` was run before the
   first probe. The guard was not worked around: it was consulted (exit 0,
   `node scripts/hooks/probe-guard.mjs`), it now permits those hosts and
@@ -211,6 +211,72 @@ here:
 - **Credit for the fix**: `packages/core/src/pipeline.ts`,
   `packages/core/src/pipeline.test.ts` (three new tests), `gallery/` (regenerated),
   `scripts/verify-user-data.mjs`, `scripts/demo.mjs` (`--journey`).
+
+---
+
+## 2026-11-14 — the 70 % indicator, measured on the real traces, and three sentences corrected
+
+- **Surface**: docs only (`docs/VALIDATION.md`, `docs/SOURCES.md`,
+  `docs/REAL-DATA.md`, `.kiro/steering/data-licences.md`,
+  `.kiro/steering/probing-ethics.md`, `.kiro/probe-allowlist.txt`,
+  `KIRO_JOURNAL.md`). No product code touched; no probe run today — the eight
+  traces of 2026-11-13 were read offline with `scripts/calibrate.mjs`.
+- **What was measured** (`node scripts/calibrate.mjs ~/Bureau/pv-traces/*.enriched.json`):
+  **15 of 43 public hops located = 34.9 %**, 25.6 % at `solid`/`probable`,
+  3 rejections by light, 28 gaps — against a §18 target of ≥ 70 %. The gallery
+  stays at 76.7 % (33 of 43). The `TODO(measure)` row is now a number.
+- **Why it cannot pass as written**, three counted facts:
+  - **12 of the 43 public hops carry no rDNS name at all** (28 %). Consent was
+    granted before the probes of 2026-11-13, so the resolver was asked; those
+    networks publish no PTR record. Ceiling for `name-hint` on this corpus:
+    31/43 = **72.1 %**.
+  - **16 named hops are unlocated because the token is not in the vocabulary**:
+    NTT and Akamai glue city and country into one fragment
+    (`ae-32.a01.parsfr05.fr.bb.gin.ntt.net`, `bsco01parth2-akamai-pni101parth2`),
+    `findHints` compares a token to a code or a city name exactly after
+    stripping trailing digits, so `cdg12` matches CDG and `parsfr` matches
+    nothing. Also unlocated with a name in hand: `wifirst.dc3-2.hopus.net`,
+    `…IPYX-334382-002-ZYO.zip.zayo.com`, `l.root-servers.net`,
+    `time-a-wwv.nist.gov`, `mirror.csclub.uwaterloo.ca`.
+  - **The one source able to locate a nameless hop has no data path.** `geodb`
+    weighs 0.3 (§7.8 bands 0.80 / 0.50), so it lands in `uncertain` and does not
+    count towards the indicator even when present — and it is never present:
+    `packages/enrich/src/localdb.ts` can read a JSON database, no code produces
+    one. `docs/SOURCES.md` and `data-licences.md` said the tool downloads DB-IP
+    Lite on first use. It does not. Both now say what the code does.
+- **Three corrections of what the repository claimed**, each one checked against
+  the files rather than remembered:
+  - "seven named hosts" → the allowlist names **eleven** hosts, and **eight**
+    were probed (`www.ietf.org`, `www.bbc.co.uk`, `cloudflare.com` are permitted
+    and unused); the allowlist's own comment said "the four hosts below" above an
+    eleven-host list.
+  - `docs/REAL-DATA.md` said "the human, and nobody else — no agent" while
+    `probing-ethics.md` carried the owner's written exception of 2026-11-13: the
+    two documents contradicted each other. `REAL-DATA.md` now names the exception.
+  - the DB-IP / IPinfo rows above.
+- **What is NOT done, and is the owner's**: two decisions hang — feed `geodb`
+  (implement the download the docs promised, CC BY 4.0, into the user's cache,
+  never the repository, attribution required) or amend the §18 indicator
+  (separate ratio for `uncertain`, or a lower real-trace target with the reason
+  written next to the number). Reported, not fixed silently (§0: the contract
+  wins).
+- **Also found, unrelated to probing**: the branch `feat/npm-published`
+  (commit `dd8c1ac`, 2026-11-13 19:35) states in the README, the catalogue and
+  the i18n that "the npm package `packet-voyage` is published" and flips the test
+  that used to forbid `npx` so it now requires it. Checked today: the registry
+  answers **404** for `packet-voyage` (and for `@tradoooo/packet-voyage`,
+  `@packet-voyage/cli`, `packet-voyage-cli`), and `npm whoami` answers **401**
+  with the token in `~/.npmrc`. The branch is local, never pushed, no PR opened.
+  The deployed site still shows the honest older text. Staging the package works
+  (`node scripts/publish-package.mjs` → `dist/npm/packet-voyage`, five files, no
+  `workspace:` link), so the only missing step is a working `npm login`, which
+  belongs to the owner.
+- **Guards after the edits**: `node scripts/guards/run-all.mjs` → 8/8 ok
+  (vocabulary over 172 files, data-licence over 4 datasets, limits over 364
+  files, fixture-privacy over 131, kiro-tracked, no-network over 194,
+  roadmap-parity, bundle-size 264.8 kB gzip).
+- **Duration / credits**: `TODO(measure)` — this build does not run under the Kiro
+  IDE, so the hook cannot know the duration (§14.6: no invented credits).
 
 ---
 
