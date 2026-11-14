@@ -23,8 +23,8 @@ the code only (§6.2).
 | TeleGeography Submarine Cable Map | CC BY-SA on *maps* only; databases subscriber-only | **NO** | nothing embedded without written permission (open question 2); OSM is the fallback |
 | PeeringDB | AUP forbids storing/transmitting without agreement | **NO** | live queries from the user's machine only, local cache, nothing in the repo |
 | RIPE IPmap / RIPEstat | API terms | **NO** | called at run time by the CLI with consent + cache |
-| DB-IP Lite | CC BY 4.0 | **NO** (size) | *planned*: into the user's cache dir, credit + link-back where results show; **no download code exists today**, so `geodb` yields no candidate (`docs/VALIDATION.md`, `packages/enrich/src/localdb.ts`) |
-| IPinfo Lite | CC BY-SA 4.0 | **NO** | alternative to DB-IP; one of the two suffices; same status — no download code today |
+| DB-IP Lite | CC BY 4.0 | **NO** (size) | *now implemented*: `voyage data geodb update` downloads it into the user's cache dir (consent must name the service), `voyage data geodb import <archive>` converts a copy already on disk with no request; credit + link-back on every journey it locates |
+| IPinfo Lite | CC BY-SA 4.0 | **NO** | alternative to DB-IP; one of the two suffices; the tool ships the DB-IP path only |
 | RIPE Atlas results | RIPE NCC terms | no raw dumps | gallery uses redacted fixtures; commercial use needs agreement |
 | Airport/city hint table | source **to confirm** | small home-made table only | from a licence-confirmed source; **no CLLI codes** (proprietary) |
 

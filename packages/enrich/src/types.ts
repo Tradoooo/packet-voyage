@@ -8,6 +8,8 @@ export type Fetcher = (
   status: number;
   json(): Promise<unknown>;
   text(): Promise<string>;
+  /** Raw bytes, for an archive rather than a JSON document (geodb download). */
+  arrayBuffer?(): Promise<ArrayBuffer>;
 }>;
 
 /** Cache abstraction (file or memory backed). */

@@ -9,6 +9,7 @@ export const THIRD_PARTY_SERVICES = [
   'RIPE IPmap',
   'RIPEstat',
   'PeeringDB',
+  'DB-IP Lite',
 ] as const;
 
 /** Return prompt text naming the services and what is sent (§6.4, VOY-F-13). */
@@ -19,6 +20,9 @@ export function consentPromptText(): string {
     '  - RIPE IPmap: queries geolocation candidates for public hops',
     '  - RIPEstat: queries network (ASN, prefix, AS name) for public hops',
     '  - PeeringDB: downloads IXP prefix directory (no route addresses sent)',
+    '  - DB-IP Lite: downloads the geolocation database into this machine only',
+    '    (~90 MB compressed, sharded to ~150 MB); no route address is sent,',
+    '    and every journey it locates carries its CC BY 4.0 credit',
     '',
     'Only PUBLIC IP addresses of your route are ever sent.',
     'Private (RFC 1918), CGNAT, link-local, loopback, and access-network hops',

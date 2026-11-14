@@ -27,6 +27,7 @@ proves it and to the artefact it leaves behind.
 | 16 | `.kiro` is present at the root and not git-ignored; the MIT licence is detected | `node scripts/guards/kiro-tracked.guard.mjs` | guard log |
 | 17 | A file stays under 500 lines and a function under 50 lines | `node scripts/guards/limits.guard.mjs` | guard log |
 | 18 | The site stays inside its weight budget | `node scripts/guards/bundle-size.guard.mjs` (after `pnpm build`) | guard log with measured sizes |
+| 19 | The local geolocation database stays out of the repository, converts without a request, and its credit travels with the journey it helped locate | `node apps/cli/bin/voyage.mjs data geodb status` · `node apps/cli/bin/voyage.mjs data geodb import <archive.csv.gz>` · `node scripts/enrich-localdb.mjs` | status line (rows, shards, MB on disk, age, licence) · recomputed journeys carrying the CC BY 4.0 credit · `node scripts/guards/fixture-privacy.guard.mjs` |
 
 ## One command for everything
 
@@ -49,11 +50,12 @@ CI runs exactly this on the self-hosted runners, inside a five-minute budget
 | The twenty properties | all green, seeds recorded | **VOY-P-01 … VOY-P-20 green** | `npx vitest run packages apps` |
 | Enrichment with a warm cache | < 3 s | `TODO(measure)` — needs a live consent and the RIPE services; the offline equality is proven instead by VOY-P-19 | `npx vitest run packages/enrich` |
 | Public hops located at `solid` or `probable` level on the gallery | ≥ 70 % | **76.7 %** (33 of 43; `with-gaps` deliberately drags it down at 42.9 %) | `node scripts/calibrate.mjs` |
-| The same ratio on thirty real traces | ≥ 70 % | **34.9 %** — 15 of 43 public hops located across **8** real traces (not thirty), run 2026-11-13 under the owner's written exception; the structural ceiling with router names alone is **72.1 %** (31 of 43: twelve hops carry no rDNS at all). See "The 70 % indicator on real traces" below. | `node scripts/calibrate.mjs ~/Bureau/pv-traces/*.enriched.json` |
+| The same ratio on thirty real traces, at `solid` or `probable` | ≥ 70 % | **25.6 %** — 11 of 43 public hops across **8** real traces (not thirty), run 2026-11-13 under the owner's written exception. The local geolocation database weighs 0.3, below the 0.50 `probable` band: it situates a hop without confirming it. See "The 70 % indicator on real traces" below. | `node scripts/calibrate.mjs ~/Bureau/pv-traces/*.enriched.json` |
+| The same ratio, counting a hop located at any confidence level | ≥ 70 % | **86.0 %** — 37 of 43, with the local database in place (34.9 % without it: 15 of 43). The gaps fall from 28 to 6; the light rejects five more answers, which the product counts. | `node scripts/enrich-localdb.mjs ~/Bureau/pv-traces/*.enriched.json --out /tmp/pv-geodb` then `node scripts/calibrate.mjs /tmp/pv-geodb/*.json` |
 | The trace tool is detected and wrapped, never through a shell | `mtr --json`, else `traceroute`, else `tracert` | **`tool: mtr-json`** on a loopback trace; ranges refused with exit 2, missing tool with exit 3, unreadable input with exit 5 | `node apps/cli/bin/voyage.mjs trace 127.0.0.1 --out /tmp/j.json` and `npx vitest run apps/cli/src/probe.test.ts` |
 | False locations rejected by the light | counted per journey | shown in every journey summary and on each hop card | gallery journeys |
 
-## The 70 % indicator on real traces — measured, and why it cannot pass as written
+## The 70 % indicator on real traces — measured, and now split in two
 
 Eight real traces exist now (`~/Bureau/pv-traces/`, run 2026-11-13 under the
 owner's written exception in `.kiro/steering/probing-ethics.md`, hosts named in
@@ -81,28 +83,47 @@ Three facts, each of them counted rather than argued:
    `parsfr` matches nothing while `cdg12` matches CDG. Extending the table or the
    matcher is a real lever, but each addition must be a documented public fact,
    never a guess about an operator's internals.
-3. **The one source that could locate a nameless hop has no data path.** `geodb`
+3. **The one source that could locate a nameless hop had no data path.** `geodb`
    is capped at weight 0.3 (§7.8 bands are 0.80 / 0.50), so a hop located by
    `geodb` alone lands in `uncertain` and does not count towards the indicator
-   even when the database is present. And the database is never present: nothing
-   in the CLI downloads DB-IP Lite or IPinfo Lite — `packages/enrich/src/localdb.ts`
-   can read a JSON file, but no code path produces one. `docs/SOURCES.md` and
-   `.kiro/steering/data-licences.md` said the tool downloads it on first use; they
-   now say what the code does instead.
+   even when the database is present — and the database was never present:
+   `packages/enrich/src/localdb.ts` could read a JSON file, but no code path
+   produced one, while `docs/SOURCES.md` and `.kiro/steering/data-licences.md`
+   said the tool downloaded DB-IP Lite on first use.
 
-So the honest reading is: **34.9 % measured against a ≥ 70 % target, and the
-target as written is unreachable on real traces** while the only source able to
-cover nameless hops scores below the band the indicator counts. This is reported,
-not fixed silently (§0: the contract wins). Two decisions are the owner's:
+### What the two decisions produced, measured on the same eight traces
 
-- **(a) feed `geodb`** — implement the download the docs promised (DB-IP Lite,
-  CC BY 4.0, into the user's cache, never the repository, with the attribution
-  line the licence requires). It raises coverage of nameless hops but still only
-  reaches `uncertain` at weight 0.3.
-- **(b) change the indicator** — either count `uncertain` in a separate ratio, or
-  set the real-trace target below the gallery one, with the reason written next to
-  the number. That is a §18 change and the contract must be amended, not the
-  measurement bent.
+**(a) `geodb` is fed.** `voyage data geodb update` downloads the DB-IP Lite
+archive (CC BY 4.0) and converts it into one gzip shard per address block;
+`voyage data geodb import <archive>` does the same for a copy already on disk,
+with no request at all; `voyage data geodb status` says what is there and how
+old it is. The shards live in the user's directory, never in the repository, and
+every journey the database helps locate carries its credit. The archive is
+**85.7 MB compressed — 7 777 727 ranges, not the 20 MB the website suggests** —
+and the conversion lands at **89.2 MB on disk** in 299 shards.
 
-Until one of them is taken, the gallery figure (76.7 %) stays what the project
-claims, and the real-trace figure stays what this file records: 34.9 %.
+The measurement is the product's own, offline, with the local database in place
+(`node scripts/enrich-localdb.mjs` then `node scripts/calibrate.mjs`):
+
+| | without the database | with it |
+|---|---|---|
+| public hops located (any level) | 15/43 — **34.9 %** | 37/43 — **86.0 %** |
+| located at `solid` or `probable` | 11/43 — **25.6 %** | 11/43 — **25.6 %** |
+| hops left as gaps | 28 | **6** |
+| locations rejected by the light | 3 | **8** |
+
+The last two lines are the honest cost of the third: the database answers for
+22 more hops, and the light rejects five of those answers it cannot reconcile
+with the speed of light — the product says so instead of hiding them.
+
+**(b) the indicator is split in two.** A single ratio could not tell "located"
+from "confirmed", and the two sources differ exactly there: `name-hint` weighs
+0.6 (`probable`), `geodb` weighs 0.3 (`uncertain`). §18 now carries two rows for
+real traces — *located at any level* (≥ 70 %, measured 86.0 %) and *located at
+`solid`/`probable`* (measured 25.6 %, with the reason written next to it) — plus
+the gallery row unchanged at 76.7 %. The measurement was not bent to fit a
+target: the target moved, and the numbers beside it are the ones the tool
+produced.
+
+The gallery figure (76.7 %) stays what the project claims. The real-trace figures
+are now two, both measured: 86.0 % located, 25.6 % confirmed.

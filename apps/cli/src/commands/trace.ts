@@ -23,7 +23,14 @@ import type { CliContext } from '../runtime.ts';
 import { emitJourneyJson, formatJourneyHuman } from '../output.ts';
 import { loadDatasets } from '../deps.ts';
 import type { FetcherLike, ParsedTraceLike } from '../deps.ts';
-import { defaultFetcher, ensureConsent, resolveSourceFromFlag, writeJourneyFile } from './shared.ts';
+import {
+  creditsWithGeodb,
+  defaultFetcher,
+  ensureConsent,
+  loadGeodb,
+  resolveSourceFromFlag,
+  writeJourneyFile,
+} from './shared.ts';
 
 export interface TraceCommandOptions {
   host?: string;
@@ -100,6 +107,7 @@ async function enrichAndCompute(
     ? { granted: false, services: [], grantedAt: null }
     : await ensureConsent(ctx, { allowPrompt: !opts.json, refuseOnMissing: false });
   const cache = deps.enrich.createFileCache(join(ctx.home, 'cache'));
+  const localDb = loadGeodb(ctx);
   const enriched = await deps.enrich.enrichHops(trace.parsed.hops, {
     offline: opts.offline || !consent.granted,
     consent,
@@ -107,6 +115,7 @@ async function enrichAndCompute(
     fetch: opts.fetcher ?? defaultFetcher(),
     now: io.now(),
     log: (line) => io.stderr(`voyage: ${line}\n`),
+    localDb,
   });
   return deps.core.computeJourney({
     parsed: { ...trace.parsed, hops: enriched.hops },
@@ -120,7 +129,7 @@ async function enrichAndCompute(
     masses: datasets.masses,
     links: datasets.links,
     hints: datasets.hints,
-    credits: datasets.credits,
+    credits: creditsWithGeodb(ctx, datasets.credits, enriched.candidates),
   });
 }
 

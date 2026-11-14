@@ -41,12 +41,12 @@ export interface CliContext {
 
 /** Error carrying one of the documented §5.8 exit codes. */
 export class CliError extends Error {
-  constructor(
-    readonly exitCode: number,
-    message: string,
-  ) {
+  readonly exitCode: number;
+
+  constructor(exitCode: number, message: string) {
     super(message);
     this.name = 'CliError';
+    this.exitCode = exitCode;
   }
 }
 

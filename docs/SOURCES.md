@@ -20,12 +20,14 @@ The code is MIT; the data package carries its own notice (`packages/data/LICENCE
   without prior agreement. It is queried live from the user's machine, cached locally,
   never vendored.
 - **DB-IP / IPinfo Lite**: the local geolocation database behind the `geodb`
-  source. **Not shipped and not yet downloaded by the tool** — no code path
-  fetches it today, so `geodb` produces no candidate (measured: 12 of 43 public
-  hops across eight real traces have no rDNS name and nothing else to locate
-  them; see `docs/VALIDATION.md`). The format it would read is defined in
-  `packages/enrich/src/localdb.ts`; a user-supplied JSON file in the cache
-  directory is the only way to feed it for now. Never committed (size and licence).
+  source. Never vendored (size and licence): the user gets it on demand with
+  `voyage data geodb update` — which refuses without a consent that names the
+  service — or converts a copy already on disk with `voyage data geodb import
+  <archive.csv.gz>`, which makes no request at all. The archive is 85.7 MB
+  compressed (7 777 727 ranges, not the 20 MB the website suggests) and lands
+  as 89.2 MB in 299 gzip shards under `~/.packet-voyage/geodb/`. Every journey
+  it helps locate carries the credit CC BY 4.0 requires. Measured on the eight
+  real traces: 34.9 % → 86.0 % of public hops located (`docs/VALIDATION.md`).
 
 ## What the hosted site sends
 

@@ -10,14 +10,17 @@ export interface DatasetIssue {
 }
 
 export class DatasetError extends Error {
-  constructor(
-    readonly datasetId: string,
-    readonly file: string,
-    readonly issues: DatasetIssue[],
-  ) {
+  readonly datasetId: string;
+  readonly file: string;
+  readonly issues: DatasetIssue[];
+
+  constructor(datasetId: string, file: string, issues: DatasetIssue[]) {
     const detail = issues.slice(0, 5).map((i) => `${i.path.join('.') || '<root>'}: ${i.message}`);
     super(`invalid dataset ${file} (${datasetId}): ${detail.join('; ')}`);
     this.name = 'DatasetError';
+    this.datasetId = datasetId;
+    this.file = file;
+    this.issues = issues;
   }
 }
 

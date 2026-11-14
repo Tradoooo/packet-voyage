@@ -154,7 +154,13 @@ export interface CacheLike {
 export type FetcherLike = (
   url: string,
   init?: { headers?: Record<string, string> },
-) => Promise<{ status: number; json(): Promise<unknown>; text(): Promise<string> }>;
+) => Promise<{
+  status: number;
+  json(): Promise<unknown>;
+  text(): Promise<string>;
+  /** Raw bytes, for an archive rather than a JSON document. */
+  arrayBuffer?(): Promise<ArrayBuffer>;
+}>;
 
 export interface EnrichOptionsLike {
   offline: boolean;
@@ -163,6 +169,8 @@ export interface EnrichOptionsLike {
   fetch: FetcherLike;
   now: string;
   log?: (line: string) => void;
+  /** The local geolocation database, when the user downloaded one (VOY-F-08). */
+  localDb?: LocalNetworkDbLike | null;
 }
 
 export interface EnrichResultLike {
@@ -172,6 +180,66 @@ export interface EnrichResultLike {
   sentAddresses: string[];
 }
 
+/* ------------------------------------------------- geolocation database (VOY-F-08) */
+
+/** A record from the local geolocation database, as the enrichment sees it. */
+export interface LocalNetworkRecordLike {
+  asn?: number | null;
+  as_name?: string | null;
+  prefix?: string | null;
+  city?: string | null;
+  country?: string | null;
+  lat?: number | null;
+  lon?: number | null;
+}
+
+export interface LocalNetworkDbLike {
+  lookup(ip: string): LocalNetworkRecordLike | null;
+}
+
+export interface GeodbStatusLike {
+  present: boolean;
+  meta_path: string;
+  rows: number;
+  shards: number;
+  retrieved_at: string | null;
+  age_days: number | null;
+  stale: boolean;
+  bytes_on_disk: number;
+  ttl_days: number;
+  licence: string;
+  attribution: string;
+}
+
+export interface GeodbDownloadOptionsLike {
+  dir: string;
+  now: string;
+  offline: boolean;
+  consent: ConsentStateLike;
+  fetch: FetcherLike;
+  log?: (line: string) => void;
+  force?: boolean;
+  monthsBack?: number;
+  maxBytes?: number;
+}
+
+export interface GeodbImportOptionsLike {
+  /** An archive already on this machine. */
+  path: string;
+  dir: string;
+  now: string;
+  log?: (line: string) => void;
+}
+
+export interface GeodbDownloadResultLike {
+  downloaded: boolean;
+  reason: string | null;
+  url: string | null;
+  rows: number;
+  shards: number;
+  bytes: number;
+}
+
 export interface EnrichDeps {
   enrichHops(hops: Hop[], options: EnrichOptionsLike): Promise<EnrichResultLike>;
   createFileCache(dir: string): CacheLike;
@@ -179,6 +247,11 @@ export interface EnrichDeps {
   writeConsent(dir: string, state: ConsentStateLike): void;
   consentPromptText(): string;
   ixpPrefixes(options: EnrichOptionsLike): Promise<unknown[]>;
+  downloadGeodb(options: GeodbDownloadOptionsLike): Promise<GeodbDownloadResultLike>;
+  importGeodbArchive(options: GeodbImportOptionsLike): Promise<GeodbDownloadResultLike>;
+  loadGeodbDb(dir: string): LocalNetworkDbLike | null;
+  geodbStatus(dir: string, now?: Date): GeodbStatusLike;
+  GEODB_ATTRIBUTION: string;
 }
 
 /* ------------------------------------------------------------- data (§5.7) */

@@ -6,6 +6,7 @@
  */
 import { CliError, EXIT_BAD_ARG, EXIT_OK } from '../runtime.ts';
 import type { CliContext } from '../runtime.ts';
+import { CONSENT_SERVICE_IDS } from './shared.ts';
 
 export type ConsentAction = 'status' | 'grant' | 'revoke';
 
@@ -13,8 +14,6 @@ export interface ConsentCommandOptions {
   action?: string;
   json: boolean;
 }
-
-const CONSENT_SERVICES = ['dns', 'ripestat', 'ipmap', 'peeringdb'];
 
 function resolveAction(raw: string | undefined): ConsentAction {
   const action = raw ?? 'status';
@@ -33,7 +32,7 @@ export async function runConsentCommand(opts: ConsentCommandOptions, ctx: CliCon
   if (action === 'grant') {
     enrich.writeConsent(ctx.home, {
       granted: true,
-      services: CONSENT_SERVICES,
+      services: CONSENT_SERVICE_IDS,
       grantedAt: io.now(),
     });
   } else if (action === 'revoke') {
