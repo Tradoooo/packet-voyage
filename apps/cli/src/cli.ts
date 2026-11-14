@@ -41,6 +41,8 @@ Usage:
   voyage export <journey.json> [options] Write the journey as GeoJSON or as a ticket report
   voyage compare <a.json> <b.json>       Two journeys side by side (IPv4/IPv6, two moments)
   voyage data status|update [options]    Dataset provenance, staleness and cache state
+  voyage data geodb status|update [opts] Local geolocation database (DB-IP Lite, CC BY 4.0)
+  voyage data geodb import <archive>   Convert a copy already on disk (no request)
   voyage consent [status|grant|revoke]   Third-party lookup consent (remembered)
   voyage mcp                             Start the stdio MCP server
 
@@ -63,6 +65,7 @@ Export options:  --format geojson|markdown (default geojson)  --language en|fr
                  --out <file>  --json
 Compare options: --language en|fr  --json
 Data options:   --offline (refuses update)  --json
+                geodb: --force (refresh a fresh copy)  --max-mb <n> (refuse a bigger archive)
 Consent:        --json
 
 Environment:
@@ -76,8 +79,8 @@ interface ParsedArgs {
   flags: Record<string, string | boolean>;
 }
 
-const VALUE_FLAGS = new Set(['proto', 'cycles', 'from', 'out', 'level', 'base-url', 'year', 'format', 'language']);
-const BOOLEAN_FLAGS = new Set(['help', 'ipv6', 'offline', 'open', 'json', 'yes']);
+const VALUE_FLAGS = new Set(['proto', 'cycles', 'from', 'out', 'level', 'base-url', 'year', 'format', 'language', 'max-mb']);
+const BOOLEAN_FLAGS = new Set(['help', 'ipv6', 'offline', 'open', 'json', 'yes', 'force']);
 
 function takeOption(argv: string[], idx: number, flags: Record<string, string | boolean>): number {
   const token = argv[idx] ?? '';
@@ -146,7 +149,7 @@ function operands(parsed: ParsedArgs, max: number): string[] {
   if (ops.length > max) {
     throw new CliError(
       EXIT_BAD_ARG,
-      `unexpected extra argument "${ops[max] ?? ''}" (one operand per command)`,
+      `unexpected extra argument "${ops[max] ?? ''}" (at most ${max === 1 ? 'one operand' : `${max} operands`} per command)`,
     );
   }
   return ops;
@@ -193,11 +196,20 @@ async function dispatchTrace(op: string | undefined, flags: Record<string, strin
   );
 }
 
-async function dispatchAdmin(command: string, op: string | undefined, flags: Record<string, string | boolean>, ctx: CliContext, opts: RunCliOptions): Promise<number> {
+async function dispatchAdmin(command: string, op: string | undefined, rest: string[], flags: Record<string, string | boolean>, ctx: CliContext, opts: RunCliOptions): Promise<number> {
   const json = bool(flags, 'json');
   if (command === 'data') {
+    const maxMbRaw = str(flags, 'max-mb');
     return runDataCommand(
-      { subcommand: op, offline: bool(flags, 'offline'), json, ...(opts.fetcher ? { fetcher: opts.fetcher } : {}) },
+      {
+        subcommand: op,
+        rest,
+        offline: bool(flags, 'offline'),
+        json,
+        force: bool(flags, 'force'),
+        ...(maxMbRaw === undefined ? {} : { maxMb: Number(maxMbRaw) }),
+        ...(opts.fetcher ? { fetcher: opts.fetcher } : {}),
+      },
       ctx,
     );
   }
@@ -214,7 +226,7 @@ async function dispatch(parsed: ParsedArgs, opts: RunCliOptions): Promise<number
     io.stdout(`${HELP_TEXT}\n`);
     return EXIT_OK;
   }
-  const ops = operands(parsed, command === 'compare' ? 2 : 1);
+  const ops = operands(parsed, command === 'compare' ? 2 : command === 'data' ? 3 : 1);
   const op = ops[0];
   const json = bool(flags, 'json');
 
@@ -251,7 +263,7 @@ async function dispatch(parsed: ParsedArgs, opts: RunCliOptions): Promise<number
     case 'data':
     case 'consent':
     case 'mcp':
-      return dispatchAdmin(command, op, flags, ctx, opts);
+      return dispatchAdmin(command, op, ops.slice(1), flags, ctx, opts);
     default:
       throw new CliError(EXIT_BAD_ARG, `unknown command "${command}" (see --help)`);
   }

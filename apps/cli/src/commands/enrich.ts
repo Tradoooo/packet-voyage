@@ -10,7 +10,14 @@ import type { CliContext } from '../runtime.ts';
 import { emitJourneyJson, formatJourneyHuman } from '../output.ts';
 import { loadDatasets } from '../deps.ts';
 import type { EnrichResultLike, FetcherLike, ParsedTraceLike } from '../deps.ts';
-import { defaultFetcher, ensureConsent, readJourneyFile, writeJourneyFile } from './shared.ts';
+import {
+  creditsWithGeodb,
+  defaultFetcher,
+  ensureConsent,
+  loadGeodb,
+  readJourneyFile,
+  writeJourneyFile,
+} from './shared.ts';
 
 export interface EnrichCommandOptions {
   file?: string;
@@ -56,7 +63,11 @@ function recomputeJourney(ctx: CliContext, journey: Journey, enriched: EnrichRes
     masses: datasets.masses,
     links: datasets.links,
     hints: datasets.hints,
-    credits: journey.credits.length > 0 ? journey.credits : datasets.credits,
+    credits: creditsWithGeodb(
+      ctx,
+      journey.credits.length > 0 ? journey.credits : datasets.credits,
+      enriched.candidates,
+    ),
   });
 }
 
@@ -75,6 +86,7 @@ export async function runEnrichCommand(opts: EnrichCommandOptions, ctx: CliConte
     fetch: opts.fetcher ?? defaultFetcher(),
     now: io.now(),
     log: (line) => io.stderr(`voyage: ${line}\n`),
+    localDb: loadGeodb(ctx),
   });
   const updated = recomputeJourney(ctx, journey, enriched);
   const outPath = opts.out ?? (opts.json ? undefined : opts.file);

@@ -5,10 +5,10 @@
  */
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { parseJourney } from '@packet-voyage/schema';
 import type { HintCity, Journey } from '@packet-voyage/schema';
-import type { ConsentStateLike, FetcherLike } from '../deps.ts';
+import type { ConsentStateLike, FetcherLike, LocalNetworkDbLike } from '../deps.ts';
 import { CliError, EXIT_BAD_ARG, EXIT_REFUSED, EXIT_UNREADABLE } from '../runtime.ts';
 import type { CliContext, CliIo } from '../runtime.ts';
 
@@ -124,7 +124,16 @@ export async function writeJourneyFile(
   return writeTextFile(outPath, `${JSON.stringify(journey, null, 2)}\n`, io);
 }
 
-const CONSENT_SERVICES = ['dns', 'ripestat', 'ipmap', 'peeringdb'];
+/**
+ * The service ids a consent record may name, in the order the prompt lists them.
+ * One list, two callers (`consent grant` and the interactive gate): the prompt
+ * text comes from `packages/enrich`, so an id added there must be added here —
+ * and a download the record does not name is refused, not assumed.
+ */
+export const CONSENT_SERVICE_IDS = ['dns', 'ripestat', 'ipmap', 'peeringdb', 'geodb'];
+
+/** The geolocation database needs its own mention: it is a download, not a lookup. */
+export const GEODB_CONSENT_SERVICE = 'geodb';
 
 /**
  * Consent gate: returns the stored state; when interactive, shows the
@@ -144,7 +153,7 @@ export async function ensureConsent(
     if (accepted) {
       const granted: ConsentStateLike = {
         granted: true,
-        services: CONSENT_SERVICES,
+        services: CONSENT_SERVICE_IDS,
         grantedAt: ctx.io.now(),
       };
       enrich.writeConsent(ctx.home, granted);
@@ -168,6 +177,41 @@ export function defaultFetcher(): FetcherLike {
       status: response.status,
       json: () => response.json() as Promise<unknown>,
       text: () => response.text(),
+      arrayBuffer: () => response.arrayBuffer(),
     };
   };
+}
+
+/* -------------------------------------------------- geolocation database (VOY-F-08) */
+
+/** Where the user's copy of the geolocation database lives (never the repo). */
+export function geodbDir(ctx: CliContext): string {
+  return join(ctx.home, 'geodb', 'dbip-city-lite');
+}
+
+/**
+ * The local geolocation database, if the user has one. `voyage read` never
+ * asks for it: that command is the offline oracle the site is checked against,
+ * and giving it a database the browser cannot have would split the two.
+ */
+export function loadGeodb(ctx: CliContext): LocalNetworkDbLike | null {
+  return ctx.deps.enrich.loadGeodbDb(geodbDir(ctx));
+}
+
+/**
+ * Credits for a journey, with the CC BY 4.0 line added only when the local
+ * database actually answered something: an attribution for an unused copy
+ * would be noise, and a missing one for a used copy would breach the licence.
+ */
+export function creditsWithGeodb(
+  ctx: CliContext,
+  base: string[],
+  candidates: unknown[][],
+): string[] {
+  const used = candidates
+    .flat()
+    .some((c) => (c as { source?: string } | null)?.source === 'geodb');
+  if (!used) return base;
+  const credit = ctx.deps.enrich.GEODB_ATTRIBUTION;
+  return base.includes(credit) ? base : [...base, credit];
 }

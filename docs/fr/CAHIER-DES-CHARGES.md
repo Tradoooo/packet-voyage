@@ -123,7 +123,9 @@ Pourquoi le problème persiste :
 | Indicateur | Cible |
 |---|---|
 | Localisations physiquement impossibles affichées | Zéro, garanti par les propriétés VOY-P-06 et VOY-P-07 |
-| Étapes publiques localisées au niveau « solide » ou « probable » sur la galerie | Au moins 70 % (cible à étalonner sur des traces réelles) |
+| Étapes publiques localisées au niveau « solide » ou « probable » sur la galerie | Au moins 70 % — mesuré **76,7 %** (33 sur 43) |
+| Étapes publiques localisées au niveau « solide » ou « probable » sur des traces réelles | Au moins 70 % — mesuré **25,6 %** (11 sur 43, huit traces du 2026-11-13). La base locale de géolocalisation pèse 0,3, sous le seuil « probable » (0,50) : elle situe un hop sans le confirmer. Cible distincte de celle de la galerie, car les traces réelles n'ont ni noms de route ni PTR |
+| Étapes publiques localisées, à quelque niveau de confiance que ce soit, sur des traces réelles | Au moins 70 % — mesuré **86,0 %** (37 sur 43). C'est le ratio que la base locale déplace : 34,9 % (15 sur 43) sans elle |
 | Temps entre la fin de la trace et l'affichage du trajet, cache chaud | Moins de 3 secondes |
 | Libellés affirmant un câble « emprunté » | Zéro, vérifié par un contrôle automatique du vocabulaire |
 | Requêtes réseau du site hébergé sans accord | Zéro après le chargement |
@@ -1084,6 +1086,7 @@ Chaque point se prouve par un journal ou un fichier, jamais à l'œil seul ni à
 - [ ] La feuille de route contient toutes les étapes et tous les segments de la carte (comparaison automatique).
 - [ ] Le parcours complet se fait au clavier (enregistrement du test de bout en bout).
 - [ ] Le hook `probe-guard` a bloqué au moins une tentative pendant la construction (ligne du journal).
+- [ ] La base locale de géolocalisation reste hors du dépôt, se signale (`voyage data geodb status`), se convertit sans requête (`voyage data geodb import`), et son crédit « CC BY 4.0 » accompagne tout trajet qu'elle a situé (sortie du contrôle de caviardage et du test d'attribution).
 - [ ] `.kiro` est présent à la racine et absent du `.gitignore` ; la licence MIT est détectée.
 
 ---

@@ -13,6 +13,9 @@ import type {
   DataDeps,
   EnrichDeps,
   EnrichOptionsLike,
+  GeodbDownloadOptionsLike,
+  GeodbImportOptionsLike,
+  LocalNetworkDbLike,
   ParsedTraceLike,
   VoyageDeps,
 } from '../deps.ts';
@@ -144,6 +147,10 @@ export interface FakeDepsOptions {
   parseResult?: 'trace' | 'unknown';
   enrichMissing?: string[];
   staleIds?: string[];
+  /** Why the fake declined to download the geolocation database. */
+  geodbReason?: string;
+  /** The local geolocation database the fake hands to the enrichment. */
+  geodbDb?: LocalNetworkDbLike | null;
 }
 
 function fakeParseTrace(text: string, options: FakeDepsOptions): ParsedTraceLike {
@@ -221,18 +228,19 @@ function makeFakeCore(options: FakeDepsOptions): CoreDeps {
   };
 }
 
-function makeFakeEnrich(
-  options: FakeDepsOptions,
-  state: {
-    consentState: ConsentStateLike;
-    consentDirs: string[];
-    cacheStore: Map<string, unknown>;
-    cacheDirs: string[];
-    enrichOpts: EnrichOptionsLike[];
-    enrichCalls: { count: number };
-  },
-): EnrichDeps {
-  const cache: CacheLike = {
+interface FakeState {
+  consentState: ConsentStateLike;
+  consentDirs: string[];
+  cacheStore: Map<string, unknown>;
+  cacheDirs: string[];
+  enrichOpts: EnrichOptionsLike[];
+  enrichCalls: { count: number };
+  geodbOpts: GeodbDownloadOptionsLike[];
+  geodbImports: GeodbImportOptionsLike[];
+}
+
+function fakeCache(state: FakeState): CacheLike {
+  return {
     get: <T>(key: string) => (state.cacheStore.has(key) ? (state.cacheStore.get(key) as T) : null),
     set: <T>(key: string, value: T) => {
       state.cacheStore.set(key, value);
@@ -243,6 +251,59 @@ function makeFakeEnrich(
       newest: state.cacheStore.size > 0 ? '2026-11-11T00:00:00.000Z' : null,
     }),
   };
+}
+
+/** The geolocation-database half of the fake: no download, nothing on disk. */
+function fakeGeodb(
+  options: FakeDepsOptions,
+  state: FakeState,
+): Pick<
+  EnrichDeps,
+  'downloadGeodb' | 'importGeodbArchive' | 'loadGeodbDb' | 'geodbStatus' | 'GEODB_ATTRIBUTION'
+> {
+  return {
+    downloadGeodb: async (geodbOptions) => {
+      state.geodbOpts.push(geodbOptions);
+      return {
+        downloaded: false,
+        reason: options.geodbReason ?? 'fake-no-download',
+        url: null,
+        rows: 0,
+        shards: 0,
+        bytes: 0,
+      };
+    },
+    importGeodbArchive: async (importOptions) => {
+      state.geodbImports.push(importOptions);
+      return {
+        downloaded: false,
+        reason: 'fake-no-import',
+        url: importOptions.path,
+        rows: 0,
+        shards: 0,
+        bytes: 0,
+      };
+    },
+    loadGeodbDb: () => options.geodbDb ?? null,
+    geodbStatus: (dir) => ({
+      present: false,
+      meta_path: dir,
+      rows: 0,
+      shards: 0,
+      retrieved_at: null,
+      age_days: null,
+      stale: true,
+      bytes_on_disk: 0,
+      ttl_days: 30,
+      licence: 'CC-BY-4.0',
+      attribution: 'IP geolocation data: DB-IP Lite (fake), CC BY 4.0',
+    }),
+    GEODB_ATTRIBUTION: 'IP geolocation data: DB-IP Lite (fake), CC BY 4.0',
+  };
+}
+
+function makeFakeEnrich(options: FakeDepsOptions, state: FakeState): EnrichDeps {
+  const cache = fakeCache(state);
   return {
     enrichHops: async (hops, enrichOptions) => {
       state.enrichCalls.count += 1;
@@ -267,8 +328,9 @@ function makeFakeEnrich(
       state.consentState = s;
     },
     consentPromptText: () =>
-      'With your consent, public hop addresses are sent to: system DNS (reverse), RIPEstat, RIPE IPmap, PeeringDB.',
+      'With your consent, public hop addresses are sent to: system DNS (reverse), RIPEstat, RIPE IPmap, PeeringDB. The geolocation database is downloaded and kept on this machine.',
     ixpPrefixes: async () => [{ prefix: '192.0.2.0/24', ixp: 'Test-IX' }],
+    ...fakeGeodb(options, state),
   };
 }
 
@@ -293,6 +355,8 @@ export function createFakeDeps(options: FakeDepsOptions = {}): VoyageDeps & {
   cacheDirs: string[];
   enrichOpts: EnrichOptionsLike[];
   enrichCalls: number;
+  geodbOpts: GeodbDownloadOptionsLike[];
+  geodbImports: GeodbImportOptionsLike[];
 } {
   const state = {
     consentState: options.consent ?? { granted: false, services: [], grantedAt: null },
@@ -301,6 +365,8 @@ export function createFakeDeps(options: FakeDepsOptions = {}): VoyageDeps & {
     cacheDirs: [] as string[],
     enrichOpts: [] as EnrichOptionsLike[],
     enrichCalls: { count: 0 },
+    geodbOpts: [] as GeodbDownloadOptionsLike[],
+    geodbImports: [] as GeodbImportOptionsLike[],
   };
   return {
     core: makeFakeCore(options),
@@ -313,6 +379,8 @@ export function createFakeDeps(options: FakeDepsOptions = {}): VoyageDeps & {
     cacheStore: state.cacheStore,
     cacheDirs: state.cacheDirs,
     enrichOpts: state.enrichOpts,
+    geodbOpts: state.geodbOpts,
+    geodbImports: state.geodbImports,
     get enrichCalls() {
       return state.enrichCalls.count;
     },

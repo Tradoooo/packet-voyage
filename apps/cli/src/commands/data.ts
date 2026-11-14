@@ -1,8 +1,10 @@
 
 /**
- * `voyage data status|update` — report the embedded datasets (source, date,
- * licence, staleness > 90 days, VOY-N-11) and the local cache; `update`
- * refreshes the IXP prefix cache with consent (never writes into the repo).
+ * `voyage data status|update|geodb` — report the embedded datasets (source,
+ * date, licence, staleness > 90 days, VOY-N-11) and the local cache; `update`
+ * refreshes the IXP prefix cache with consent (never writes into the repo);
+ * `geodb` manages the local geolocation database, which is downloaded into the
+ * user's directory and never vendored (VOY-F-08, §6.1).
  */
 import { join } from 'node:path';
 import type { Provenance } from '@packet-voyage/schema';
@@ -10,11 +12,16 @@ import { CliError, EXIT_BAD_ARG, EXIT_OK, EXIT_REFUSED } from '../runtime.ts';
 import type { CliContext } from '../runtime.ts';
 import type { CacheLike, FetcherLike } from '../deps.ts';
 import { defaultFetcher, ensureConsent } from './shared.ts';
+import { runGeodbCommand } from './geodb.ts';
 
 export interface DataCommandOptions {
   subcommand?: string;
+  /** Further positionals: `data geodb <status|update>` lives one level deeper. */
+  rest?: string[];
   offline: boolean;
   json: boolean;
+  force?: boolean;
+  maxMb?: number;
   fetcher?: FetcherLike;
 }
 
@@ -52,11 +59,28 @@ function formatStatusHuman(payload: Record<string, unknown>, provenance: Provena
   return `${lines.join('\n')}\n`;
 }
 
+/** `data geodb …` — one level deeper, so `runDataCommand` stays short. */
+function runGeodbSubcommand(opts: DataCommandOptions, ctx: CliContext): Promise<number> {
+  return runGeodbCommand(
+    {
+      subcommand: opts.rest?.[0],
+      ...(opts.rest?.[1] !== undefined ? { file: opts.rest[1] } : {}),
+      offline: opts.offline,
+      force: opts.force ?? false,
+      ...(opts.maxMb !== undefined ? { maxMb: opts.maxMb } : {}),
+      json: opts.json,
+      ...(opts.fetcher ? { fetcher: opts.fetcher } : {}),
+    },
+    ctx,
+  );
+}
+
 export async function runDataCommand(opts: DataCommandOptions, ctx: CliContext): Promise<number> {
   const { io, deps } = ctx;
   const sub = opts.subcommand ?? 'status';
+  if (sub === 'geodb') return runGeodbSubcommand(opts, ctx);
   if (sub !== 'status' && sub !== 'update') {
-    throw new CliError(EXIT_BAD_ARG, `unknown data subcommand "${sub}" (expected status or update)`);
+    throw new CliError(EXIT_BAD_ARG, `unknown data subcommand "${sub}" (expected status, update or geodb)`);
   }
   const cache = deps.enrich.createFileCache(join(ctx.home, 'cache'));
 
