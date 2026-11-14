@@ -19,8 +19,13 @@ The code is MIT; the data package carries its own notice (`packages/data/LICENCE
 - **PeeringDB**: its acceptable-use policy forbids reproducing or storing its data
   without prior agreement. It is queried live from the user's machine, cached locally,
   never vendored.
-- **DB-IP / IPinfo Lite**: downloaded by the tool at first use into the user's cache,
-  never committed (size and licence).
+- **DB-IP / IPinfo Lite**: the local geolocation database behind the `geodb`
+  source. **Not shipped and not yet downloaded by the tool** — no code path
+  fetches it today, so `geodb` produces no candidate (measured: 12 of 43 public
+  hops across eight real traces have no rDNS name and nothing else to locate
+  them; see `docs/VALIDATION.md`). The format it would read is defined in
+  `packages/enrich/src/localdb.ts`; a user-supplied JSON file in the cache
+  directory is the only way to feed it for now. Never committed (size and licence).
 
 ## What the hosted site sends
 

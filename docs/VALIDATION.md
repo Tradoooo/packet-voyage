@@ -49,6 +49,60 @@ CI runs exactly this on the self-hosted runners, inside a five-minute budget
 | The twenty properties | all green, seeds recorded | **VOY-P-01 … VOY-P-20 green** | `npx vitest run packages apps` |
 | Enrichment with a warm cache | < 3 s | `TODO(measure)` — needs a live consent and the RIPE services; the offline equality is proven instead by VOY-P-19 | `npx vitest run packages/enrich` |
 | Public hops located at `solid` or `probable` level on the gallery | ≥ 70 % | **76.7 %** (33 of 43; `with-gaps` deliberately drags it down at 42.9 %) | `node scripts/calibrate.mjs` |
-| The same ratio on thirty real traces | ≥ 70 % | `TODO(measure)` — needs traces run by a human: the build agent is forbidden to probe (§14.3) | `node scripts/calibrate.mjs ~/traces/*.json` |
+| The same ratio on thirty real traces | ≥ 70 % | **34.9 %** — 15 of 43 public hops located across **8** real traces (not thirty), run 2026-11-13 under the owner's written exception; the structural ceiling with router names alone is **72.1 %** (31 of 43: twelve hops carry no rDNS at all). See "The 70 % indicator on real traces" below. | `node scripts/calibrate.mjs ~/Bureau/pv-traces/*.enriched.json` |
 | The trace tool is detected and wrapped, never through a shell | `mtr --json`, else `traceroute`, else `tracert` | **`tool: mtr-json`** on a loopback trace; ranges refused with exit 2, missing tool with exit 3, unreadable input with exit 5 | `node apps/cli/bin/voyage.mjs trace 127.0.0.1 --out /tmp/j.json` and `npx vitest run apps/cli/src/probe.test.ts` |
 | False locations rejected by the light | counted per journey | shown in every journey summary and on each hop card | gallery journeys |
+
+## The 70 % indicator on real traces — measured, and why it cannot pass as written
+
+Eight real traces exist now (`~/Bureau/pv-traces/`, run 2026-11-13 under the
+owner's written exception in `.kiro/steering/probing-ethics.md`, hosts named in
+`.kiro/probe-allowlist.txt`, raw files kept outside the repository). Measured
+with `node scripts/calibrate.mjs`:
+
+```
+TOTAL 8 journeys · 15/43 public hops located (34.9 %), 25.6 % at solid or
+probable · 3 rejected by light · 28 gaps · target 70 %   → NOT MET
+```
+
+Three facts, each of them counted rather than argued:
+
+1. **Twelve of the 43 public hops carry no rDNS name at all** (28 %). Consent
+   was granted before the first probe, so the resolver was asked; those networks
+   simply publish no PTR record. No name-based source can locate a hop without a
+   name, so the ceiling for `name-hint` alone on this corpus is 31/43 = **72.1 %**
+   — the target is only reachable if almost every named hop resolves to a city.
+2. **Sixteen named hops are unlocated because their operator's naming convention
+   is not in the vocabulary** (`ae-32.a01.parsfr05.fr.bb.gin.ntt.net` — NTT glues
+   city and country into one token; `bsco01parth2-akamai-pni101parth2…` — Akamai
+   does the same; `wifirst.dc3-2.hopus.net`, `…IPYX-334382-002-ZYO.zip.zayo.com`,
+   `l.root-servers.net`, `time-a-wwv.nist.gov`). `findHints` matches a token
+   against a table code or city name exactly, after stripping trailing digits, so
+   `parsfr` matches nothing while `cdg12` matches CDG. Extending the table or the
+   matcher is a real lever, but each addition must be a documented public fact,
+   never a guess about an operator's internals.
+3. **The one source that could locate a nameless hop has no data path.** `geodb`
+   is capped at weight 0.3 (§7.8 bands are 0.80 / 0.50), so a hop located by
+   `geodb` alone lands in `uncertain` and does not count towards the indicator
+   even when the database is present. And the database is never present: nothing
+   in the CLI downloads DB-IP Lite or IPinfo Lite — `packages/enrich/src/localdb.ts`
+   can read a JSON file, but no code path produces one. `docs/SOURCES.md` and
+   `.kiro/steering/data-licences.md` said the tool downloads it on first use; they
+   now say what the code does instead.
+
+So the honest reading is: **34.9 % measured against a ≥ 70 % target, and the
+target as written is unreachable on real traces** while the only source able to
+cover nameless hops scores below the band the indicator counts. This is reported,
+not fixed silently (§0: the contract wins). Two decisions are the owner's:
+
+- **(a) feed `geodb`** — implement the download the docs promised (DB-IP Lite,
+  CC BY 4.0, into the user's cache, never the repository, with the attribution
+  line the licence requires). It raises coverage of nameless hops but still only
+  reaches `uncertain` at weight 0.3.
+- **(b) change the indicator** — either count `uncertain` in a separate ratio, or
+  set the real-trace target below the gallery one, with the reason written next to
+  the number. That is a §18 change and the contract must be amended, not the
+  measurement bent.
+
+Until one of them is taken, the gallery figure (76.7 %) stays what the project
+claims, and the real-trace figure stays what this file records: 34.9 %.

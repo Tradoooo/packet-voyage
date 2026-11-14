@@ -8,7 +8,11 @@ calibration and demonstration, and only a human may produce it.
 
 ## Who may probe
 
-- The human, and nobody else — no agent, no CI job, no cron.
+- The human, and nobody else — no agent, no CI job, no cron. **One written
+  exception exists**: on 2026-11-13 the owner asked the agent to produce the
+  calibration traces, and named the hosts it may probe in
+  `.kiro/probe-allowlist.txt` (see "The owner's exception of 2026-11-13" in
+  `probing-ethics.md`). Outside those named hosts, rule 1 stands unchanged.
 - One host at a time, at the human's explicit request: never a range, never a
   list (VOY-F-42 — the CLI itself refuses them).
 - Never `sudo`, never raw sockets, never a privileged mode (§11.6).

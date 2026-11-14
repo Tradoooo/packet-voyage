@@ -49,8 +49,9 @@ existed — the demo ran on the synthetic example — and the rule was the reaso
 
 What changed, and nothing else:
 
-- `.kiro/probe-allowlist.txt` names **seven public hosts**, in writing, for
-  this calibration only. The guard was consulted before every probe
+- `.kiro/probe-allowlist.txt` names **eleven public hosts**, in writing, for
+  this calibration only (eight of them were probed on 2026-11-13; the other
+  three are permitted and unused). The guard was consulted before every probe
   (`node scripts/hooks/probe-guard.mjs`, exit 0) and was not worked around:
   it permits those hosts and refuses everything else.
 - `voyage consent grant` was run before the first probe, so the enrichment
