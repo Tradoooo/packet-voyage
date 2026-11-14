@@ -1,0 +1,285 @@
+{
+  "url": "https://tradoooo.github.io/packet-voyage/",
+  "date": "2026-11-14",
+  "steps": [
+    {
+      "id": "paste",
+      "title": "Step 1 — the visitor pastes the trace",
+      "how": "the text is pasted in the site and computed there",
+      "checks": [
+        {
+          "name": "summary-distance",
+          "shown": "TOTAL DISTANCE: at least 6,254 km",
+          "expected": 6254,
+          "ok": true
+        },
+        {
+          "name": "summary-rtt",
+          "shown": "MEASURED ROUND-TRIP DELAY: 91.7 ms",
+          "expected": 91.702,
+          "ok": true
+        },
+        {
+          "name": "summary-light-floor",
+          "shown": "FIBRE LIGHT FLOOR: 60.8 ms",
+          "expected": 60.76044045356286,
+          "ok": true
+        },
+        {
+          "name": "summary-inflation",
+          "shown": "ROUTE INFLATION: ×1.51",
+          "expected": 1.509238565676375,
+          "ok": true
+        },
+        {
+          "name": "summary-countries",
+          "shown": "COUNTRIES WHERE A HOP WAS LOCATED: 3 (FR, GB, US)",
+          "expected": 3,
+          "ok": true
+        },
+        {
+          "name": "summary-networks",
+          "shown": "DISTINCT NETWORKS: 0",
+          "expected": 0,
+          "ok": true
+        },
+        {
+          "name": "summary-ixps",
+          "shown": "INTERNET EXCHANGE POINTS: 0",
+          "expected": 0,
+          "ok": true
+        },
+        {
+          "name": "summary-rejections",
+          "shown": "LOCATIONS REJECTED BY LIGHT: 0",
+          "expected": 0,
+          "ok": true
+        },
+        {
+          "name": "summary-gaps",
+          "shown": "UNLOCATED OR SILENT HOPS: 1",
+          "expected": 1,
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "failed": 0
+    },
+    {
+      "id": "import",
+      "title": "Step 2 — the visitor opens the journey.json the command line wrote",
+      "how": "`voyage read --offline --json` wrote it; the site reads it with the File API",
+      "checks": [
+        {
+          "name": "summary-distance",
+          "shown": "TOTAL DISTANCE: at least 6,254 km",
+          "expected": 6254,
+          "ok": true
+        },
+        {
+          "name": "summary-rtt",
+          "shown": "MEASURED ROUND-TRIP DELAY: 91.7 ms",
+          "expected": 91.702,
+          "ok": true
+        },
+        {
+          "name": "summary-light-floor",
+          "shown": "FIBRE LIGHT FLOOR: 60.8 ms",
+          "expected": 60.76044045356286,
+          "ok": true
+        },
+        {
+          "name": "summary-inflation",
+          "shown": "ROUTE INFLATION: ×1.51",
+          "expected": 1.509238565676375,
+          "ok": true
+        },
+        {
+          "name": "summary-countries",
+          "shown": "COUNTRIES WHERE A HOP WAS LOCATED: 3 (FR, GB, US)",
+          "expected": 3,
+          "ok": true
+        },
+        {
+          "name": "summary-networks",
+          "shown": "DISTINCT NETWORKS: 0",
+          "expected": 0,
+          "ok": true
+        },
+        {
+          "name": "summary-ixps",
+          "shown": "INTERNET EXCHANGE POINTS: 0",
+          "expected": 0,
+          "ok": true
+        },
+        {
+          "name": "summary-rejections",
+          "shown": "LOCATIONS REJECTED BY LIGHT: 0",
+          "expected": 0,
+          "ok": true
+        },
+        {
+          "name": "summary-gaps",
+          "shown": "UNLOCATED OR SILENT HOPS: 1",
+          "expected": 1,
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "failed": 0
+    },
+    {
+      "id": "share",
+      "title": "Step 3 — the visitor opens a share link",
+      "how": "the journey rides in the fragment; no server stores it",
+      "checks": [
+        {
+          "name": "summary-distance",
+          "shown": "TOTAL DISTANCE: at least 6,254 km",
+          "expected": 6254,
+          "ok": true
+        },
+        {
+          "name": "summary-rtt",
+          "shown": "MEASURED ROUND-TRIP DELAY: 91.7 ms",
+          "expected": 91.702,
+          "ok": true
+        },
+        {
+          "name": "summary-light-floor",
+          "shown": "FIBRE LIGHT FLOOR: 60.8 ms",
+          "expected": 60.76044045356286,
+          "ok": true
+        },
+        {
+          "name": "summary-inflation",
+          "shown": "ROUTE INFLATION: ×1.51",
+          "expected": 1.509238565676375,
+          "ok": true
+        },
+        {
+          "name": "summary-countries",
+          "shown": "COUNTRIES WHERE A HOP WAS LOCATED: 3 (FR, GB, US)",
+          "expected": 3,
+          "ok": true
+        },
+        {
+          "name": "summary-networks",
+          "shown": "DISTINCT NETWORKS: 0",
+          "expected": 0,
+          "ok": true
+        },
+        {
+          "name": "summary-ixps",
+          "shown": "INTERNET EXCHANGE POINTS: 0",
+          "expected": 0,
+          "ok": true
+        },
+        {
+          "name": "summary-rejections",
+          "shown": "LOCATIONS REJECTED BY LIGHT: 0",
+          "expected": 0,
+          "ok": true
+        },
+        {
+          "name": "summary-gaps",
+          "shown": "UNLOCATED OR SILENT HOPS: 1",
+          "expected": 1,
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "failed": 0
+    },
+    {
+      "id": "catalogue",
+      "title": "Step 4 — the catalogue demonstrates that journey",
+      "how": "every block of #/features runs on the loaded journey",
+      "checks": [
+        {
+          "name": "feature blocks rendered",
+          "shown": "14",
+          "expected": 13,
+          "ok": true
+        },
+        {
+          "name": "data named on screen",
+          "shown": "Your data — www.example.org, traced on 14 Nov 2026.",
+          "expected": "Your data",
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "failed": 0
+    },
+    {
+      "id": "chain",
+      "title": "Step 5 — the chain of proof: the blocks tell the same story",
+      "how": "every figure more than one block shows, read from the page and compared block by block",
+      "checks": [
+        {
+          "name": "chain proof.distance",
+          "shown": "map=6253.58522572968 export=6253.58522572968",
+          "expected": "one value",
+          "ok": true
+        },
+        {
+          "name": "chain proof.floor",
+          "shown": "map=60.76044045356286 insights=60.76044045356286",
+          "expected": "one value",
+          "ok": true
+        },
+        {
+          "name": "chain proof.hops",
+          "shown": "timeline=8 roadmap=8 export=8",
+          "expected": "one value",
+          "ok": true
+        },
+        {
+          "name": "chain proof.countries",
+          "shown": "insights=3 story=3",
+          "expected": "one value",
+          "ok": true
+        },
+        {
+          "name": "chain proof.segments",
+          "shown": "roadmap=6 export=6",
+          "expected": "one value",
+          "ok": true
+        },
+        {
+          "name": "chain proof.distance against the oracle",
+          "shown": "6253.58522572968",
+          "expected": 6254,
+          "ok": true
+        },
+        {
+          "name": "chain verdict",
+          "shown": "5 figures shared by two blocks or more, and the blocks agree.",
+          "expected": "the blocks agree",
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "failed": 0
+    }
+  ],
+  "network": {
+    "requests": [
+      "https://tradoooo.github.io/packet-voyage/",
+      "https://tradoooo.github.io/packet-voyage/assets/index-UfSDMecD.js",
+      "https://tradoooo.github.io/packet-voyage/assets/index-W6MYry4k.css",
+      "https://tradoooo.github.io/packet-voyage/assets/src-BKgpQwiH.js",
+      "https://tradoooo.github.io/packet-voyage/assets/fixed-links-32wCgc4I.js",
+      "https://tradoooo.github.io/packet-voyage/assets/hints-Y62wMazt.js",
+      "https://tradoooo.github.io/packet-voyage/assets/landmasses-hK_6HLaW.js",
+      "https://tradoooo.github.io/packet-voyage/assets/submarine-cables-BX07K3Oo.js",
+      "https://tradoooo.github.io/packet-voyage/assets/fixed-links-CgJrbsj1.js",
+      "https://tradoooo.github.io/packet-voyage/assets/hints-fxbtIwg6.js",
+      "https://tradoooo.github.io/packet-voyage/assets/landmasses-DJgZaW3-.js",
+      "https://tradoooo.github.io/packet-voyage/assets/submarine-cables-B3XWLE7Y.js"
+    ],
+    "errors": [],
+    "external": []
+  }
+}
